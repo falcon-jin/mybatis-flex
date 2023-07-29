@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 
 @Component
-public class AccountService {
+public class AccountService  {
 
 
     @Resource
