@@ -70,12 +70,12 @@ QueryWrapper query1 = QueryWrapper.create()
 ```sql
 SELECT *
 FROM `tb_account`
-         LEFT JOIN `tb_article` AS `a` ON `tb_account`.`id` = `a`.`account_id`
+         LEFT JOIN `tb_article` AS `a`
+         ON `a`.`is_delete` = 0 and `tb_account`.`id` = `a`.`account_id`
 WHERE `tb_account`.`age` >= 10
   AND `tb_account`.`is_delete` = 0
-  AND `a`.`is_delete` = 0
 ```
-自动添加上 `tb_account.is_delete = 0 AND a.is_delete = 0` 条件。
+在 `left join on` 条件自动添加：`a.is_delete = 0`，并在 where 条件添加上 `tb_account.is_delete = 0`。
 
 示例 2：
 
@@ -139,12 +139,13 @@ LogicDeleteManager.execWithoutLogicDelete(()->
 
 MyBatis-Flex 提供了三种字段类型对应的逻辑删除处理器，用户可以根据逻辑删除字段的类型进行设置，它们分别是：
 
-| 处理器名称                        | 对应字段类型   | 数据正常时的值 | 数据被删除时的值 |
-|------------------------------|----------|---------|----------|
-| IntegerLogicDeleteProcessor  | integer  | 0       | 1        |
-| BooleanLogicDeleteProcessor  | tinyint  | false   | true     |
-| DateTimeLogicDeleteProcessor | datetime | null    | 被删除时间    |
-| TimeStampLogicDeleteProcessor     | bigint   | 0       | 被删除时的时间戳 |
+| 处理器名称                          | 对应字段类型    | 数据正常时的值 | 数据被删除时的值 |
+|--------------------------------|-----------|---------|----------|
+| IntegerLogicDeleteProcessor    | integer   | 0       | 1        |
+| BooleanLogicDeleteProcessor    | tinyint   | false   | true     |
+| DateTimeLogicDeleteProcessor   | datetime  | null    | 被删除时间    |
+| TimeStampLogicDeleteProcessor  | bigint    | 0       | 被删除时的时间戳 |
+| PrimaryKeyLogicDeleteProcessor | 该条数据的主键类型 | null    | 该条数据的主键值 |
 
 使用时，只需通过 `LogicDeleteManager` 来设置逻辑删除处理器即可，例如：
 

@@ -16,7 +16,10 @@
 package com.mybatisflex.core.util;
 
 import com.mybatisflex.core.BaseMapper;
+import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.constant.SqlConsts;
+import com.mybatisflex.core.dialect.DbType;
+import com.mybatisflex.core.dialect.DialectFactory;
 import com.mybatisflex.core.exception.FlexExceptions;
 import com.mybatisflex.core.field.FieldQuery;
 import com.mybatisflex.core.field.FieldQueryBuilder;
@@ -201,7 +204,9 @@ public class MapperUtil {
 
 
     public static <E> E queryRelations(BaseMapper<?> mapper, E entity) {
-        queryRelations(mapper, Collections.singletonList(entity));
+        if (entity != null) {
+            queryRelations(mapper, Collections.singletonList(entity));
+        }
         return entity;
     }
 
@@ -251,6 +256,62 @@ public class MapperUtil {
             return ((Number) object).longValue();
         } else {
             throw FlexExceptions.wrap("selectCountByQuery error, can not get number value of result: \"" + object + "\"");
+        }
+    }
+
+
+    public static Map<String, Object> preparedParams(Page<?> page, QueryWrapper queryWrapper, Map<String, Object> params) {
+        Map<String, Object> newParams = new HashMap<>();
+
+        if (params != null) {
+            newParams.putAll(params);
+        }
+
+        newParams.put("pageOffset", page.offset());
+        newParams.put("pageNumber", page.getPageNumber());
+        newParams.put("pageSize", page.getPageSize());
+
+        DbType dbType = DialectFactory.getHintDbType();
+        newParams.put("dbType", dbType != null ? dbType : FlexGlobalConfig.getDefaultConfig().getDbType());
+
+        if (queryWrapper != null) {
+            preparedQueryWrapper(newParams, queryWrapper);
+        }
+
+        return newParams;
+    }
+
+
+    private static void preparedQueryWrapper(Map<String, Object> params, QueryWrapper queryWrapper) {
+        String sql = DialectFactory.getDialect().buildNoSelectSql(queryWrapper);
+        StringBuilder sqlBuilder = new StringBuilder();
+        char quote = 0;
+        int index = 0;
+        for (int i = 0; i < sql.length(); ++i) {
+            char ch = sql.charAt(i);
+            if (ch == '\'') {
+                if (quote == 0) {
+                    quote = ch;
+                } else if (quote == '\'') {
+                    quote = 0;
+                }
+            } else if (ch == '"') {
+                if (quote == 0) {
+                    quote = ch;
+                } else if (quote == '"') {
+                    quote = 0;
+                }
+            }
+            if (quote == 0 && ch == '?') {
+                sqlBuilder.append("#{qwParams_").append(index++).append("}");
+            } else {
+                sqlBuilder.append(ch);
+            }
+        }
+        params.put("qwSql", sqlBuilder.toString());
+        Object[] valueArray = CPI.getValueArray(queryWrapper);
+        for (int i = 0; i < valueArray.length; i++) {
+            params.put("qwParams_" + i, valueArray[i]);
         }
     }
 

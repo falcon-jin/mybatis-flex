@@ -1,6 +1,75 @@
 # MyBatis-Flex ChangeLog
 
 
+
+## v1.5.5 20230801:
+- 新增：添加对 xml 分页查询的支持
+- 新增：逻辑删除添加列默认值为 null 值时的构建功能，感谢 @Suomm
+- 新增：QueryWrapper 添加 `clear()` 方法以复用，感谢 @yuanbaolong
+- 优化：添加更多的 QueryWrapper.select() 方法
+- 优化：添加全表更新或全部删除时的异常信息国际化
+- 优化：移除 Mappers.java 一些无用的代码
+- 优化：重构 ModifyAttrsRecordProxyFactory 以提升性能
+- 优化：重构 Page.java，默认使用 long 统一相关参数
+- 优化：对 ClassUtil/ConvertUtil 等一些工具类进行优化，感谢 @xinjump
+- 优化：代码生成器 ignoreColumns 变更为只对Entity生成有效果，感谢 @jerryzhengsz1
+- 优化：完善 Gitee 的 issue 模板配置，感谢 @Suomm
+- 优化：Relations 附加条件参数值修改为 Object 类型，感谢 @Suomm
+- 优化：重构 ActiveRecord 的关于关联查询的链式操作方法，感谢 @Suomm
+- 修复：修复游标查询时，配置 `@Column(typeHandler =xxx)` 不生生效的问题 #I7PNUL
+- 修复：修复达梦数据库数据大小写敏感的问题 #I7OYMN
+- 修复：UpdateChain.toSQL() 在某些情况下出错的问题
+- 修复：动态表名在 updateByQuery 中无效的问题
+- 修复：多数据源、且数据源加密的情况下，无法正确解析 jdbcUrl 的问题
+- 修复：数据解密器在某些场景下会多次触发解密的问题
+- 修复：逻辑删除配置为字符串时，多添加单引号的问题，感谢 @Suomm
+- 文档：添加自动映射的相关文档描述
+- 文档：打印 SQL 的相关文档添加 MyBatis 原生配置的方式
+- 文档：优化逻辑删除文档的一些代码展示示例有误的问题
+- 文档：添加 xml 分页查询的相关文档和示例
+- 文档：添加补充 Active Record 多种方式关联查询的文档，感谢 @Suomm
+- 文档：优化多数据源的代码配置展示，感谢 @lhzsdnu
+- 文档：修改链式操作的代码示例错误，感谢 @eltociear
+- 文档：修改 SQL 审计的相关错别字，感谢 @cijie
+- 文档：修改 MyBatisFlexCustomizer 文档的一些错别字，感谢 @q-alex
+
+
+
+## v1.5.4 20230729:
+- 新增：UpdateChain.of(entity) 方法，方便直接传入 entity
+- 新增：TableInfo.buildQueryColumn() 方法，用于在泛型下构建 QueryColumn
+- 新增：添加新的 Db.executeBatch() 方法，方便直接传入集合进行批量操作
+- 新增：QueryWrapper 添加 where(consumer) 方法
+- 新增：多数据源功能添加负载均衡的能力
+- 新增：QueryWrapper 的.and() .or() 方法, 增加一个 condition 参数的方法，感谢 @jerryzhengsz
+- 新增：添加 BaseMapper.selectOneWithRelationsByIdAs() 方法，感谢 @jerryzhengsz1
+- 新增：添加异常信息国际哈的支持，感谢 @Suomm
+- 新增：添加主键逻辑删除处理器的支持，感谢 @Suomm
+- 新增：在 Service 中可以直接获取链式更新 UpdateChain 方法，感谢 @Suomm
+- 新增：ActiveRecord 添加 join 查询和 Relations 查询的功能，感谢 @Suomm
+- 新增：代码生成器添加对 ActiveRecord 生成的支持，感谢 @Suomm
+- 优化：修改 getPropertySimpleType 方法实现， 防止出现找不到类的问题，感谢 @dcrpp
+- 优化：重构将 assertAreNotNull 从 FlexExceptions 移动到 FlexAssert 中，感谢 @Suomm
+- 优化：重构 ActiveRecord 的一些方法，避免被 JSON 框架解析，感谢 @Suomm
+- 优化：标记 BaseMapper.updateNumberAddByQuery() 为删除，在未来 v1.6.0 将会从项目里删除
+- 优化：Maven 的 "artifact xxx has been relocated" 警告的问题，感谢 [@sppan24](https://github.com/sppan24)
+- 优化：优化主键逻辑删除处理器逻辑，感谢 @Suomm
+- 修复：代码生成器多次调用是出错的问题，感谢 @Suomm
+- 修复：TableInfo 相关处理时无法获取 defaultConfig 的问题，感谢 @noear_admin @lhzsdnu
+- 修复：代码生成器中的 mapper xml 默认生成路径错误的问题，感谢 @Suomm
+- 修复：逻辑删除在设置字符串时，多添加了单引号的问题，感谢 @Suomm
+- 修复：多数据源注解嵌套使用时，可能某些配置不生效的问题，感谢 @barql
+- 文档：修复字段脱敏中的一些错别字的问题，感谢 @winnerself93586
+- 文档：添加关于多数据源负载均衡的相关文档
+- 文档：修复 Db + Row 的一些代码示例错误的问题，感谢 @w-mgitee
+- 文档：修复链式操作相关的一些错别字的问题，感谢 @luyyyyy
+- 文档：修复 apt 的一些描述错误的问题，感谢 @djxchi
+- 文档：添加关于 ActiveRecord 关联查询的相关文档，感谢 @Suomm
+- 文档：更新内置逻辑删除处理器文档，感谢 @Suomm
+- 文档：修改 Query 查询的代码示例中的 Page 定义错误的问题，感谢 @eafonyoung
+
+
+
 ## v1.5.3 20230725:
 - 新增：添加 UpdateChain 方便用于对数据进行更新
 - 新增：添加对 ActiveRecord 设计模式的支持，感谢 @Suomm

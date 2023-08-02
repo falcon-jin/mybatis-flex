@@ -16,10 +16,9 @@
 
 package com.mybatisflex.core.logicdelete.impl;
 
-import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.dialect.IDialect;
 import com.mybatisflex.core.exception.FlexAssert;
-import com.mybatisflex.core.logicdelete.AbstractLogicDeleteProcessor;
+import com.mybatisflex.core.logicdelete.NullableColumnLogicDeleteProcessor;
 import com.mybatisflex.core.table.IdInfo;
 import com.mybatisflex.core.table.TableInfo;
 
@@ -34,26 +33,14 @@ import static com.mybatisflex.core.constant.SqlConsts.EQUALS;
  * @see <a href="https://gitee.com/mybatis-flex/mybatis-flex/issues/I7O1VV">I7O1VV</a>
  * @since 2023-07-26
  */
-public class PrimaryKeyLogicDeleteProcessor extends AbstractLogicDeleteProcessor {
+public class PrimaryKeyLogicDeleteProcessor extends NullableColumnLogicDeleteProcessor {
 
     @Override
     public String buildLogicDeletedSet(String logicColumn, TableInfo tableInfo, IDialect dialect) {
-        List<IdInfo> primaryKeyList = tableInfo.getPrimaryKeyList();
-        FlexAssert.notEmpty(primaryKeyList, "Must have one primary key.");
-        String column = primaryKeyList.get(0).getColumn();
+        List<IdInfo> primaryKeys = tableInfo.getPrimaryKeyList();
+        FlexAssert.notEmpty(primaryKeys, "primaryKeys");
+        String column = primaryKeys.get(0).getColumn();
         return dialect.wrap(logicColumn) + EQUALS + dialect.wrap(column);
-    }
-
-    /**
-     * 正常未删除的值为 0 （或者可配置为其他值）。
-     */
-    @Override
-    public Object getLogicNormalValue() {
-        Object normalValueOfLogicDelete = FlexGlobalConfig.getDefaultConfig().getNormalValueOfLogicDelete();
-        if (normalValueOfLogicDelete instanceof Number) {
-            return normalValueOfLogicDelete;
-        }
-        return 0;
     }
 
     /**

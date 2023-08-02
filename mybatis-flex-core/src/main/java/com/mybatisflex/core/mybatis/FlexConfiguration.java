@@ -53,7 +53,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FlexConfiguration extends Configuration {
 
-    private static Map<String, MappedStatement> dynamicMappedStatementCache = new ConcurrentHashMap<>();
+    private static final Map<String, MappedStatement> dynamicMappedStatementCache = new ConcurrentHashMap<>();
 
     public FlexConfiguration(Environment environment) {
         super(environment);
@@ -171,7 +171,7 @@ public class FlexConfiguration extends Configuration {
         }
         //entity select
         else if (StringUtil.endsWithAny(ms.getId(), "selectOneById", "selectListByIds"
-            , "selectListByQuery")) {
+            , "selectListByQuery", "selectCursorByQuery")) {
             ms = replaceResultMap(ms, getTableInfo(ms));
         }
 

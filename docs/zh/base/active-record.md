@@ -1,6 +1,6 @@
 # Active Record <Badge type="tip" text="v1.5.3" />
 
-[Active Record 模式](http://www.martinfowler.com/eaaCatalog/activeRecord.html)出自 Martin Fowler
+[Active Record](http://www.martinfowler.com/eaaCatalog/activeRecord.html) 模式出自 Martin Fowler
 写的《[企业应用架构模式](https://book.douban.com/subject/4826290/)》书中。在 Active Record
 模式中，对象中既有持久存储的数据，也有针对数据的操作。Active Record 模式把数据存取逻辑作为对象的一部分，处理对象的用户知道如何把数据写入数据库，还知道如何从数据库中读出数据。
 
@@ -34,6 +34,7 @@ public class Account extends Model<Account> {
     private String userName;
     private Integer age;
     private Date birthday;
+
 }
 ```
 
@@ -48,6 +49,7 @@ public class AccountController {
     public boolean save(@RequestBody Account account) {
         return account.save();
     }
+
 }
 ```
 
@@ -127,6 +129,17 @@ Account.create()
     .list();
 ```
 
+### 查询单列数据
+
+`Model` 提供了 `obj` 方法来查询单列数据：
+
+```java
+Account.create()
+    .select(Account::getUserName) // 只查询 user_name 列数据
+    .where(Account::getAge).ge(18)
+    .objList();
+```
+
 ### 查询分页数据
 
 `Model` 提供了 `page` 方法来查询分页数据：
@@ -137,30 +150,54 @@ Account.create()
     .page(Page.of(1,10));
 ```
 
-## 多表关联
+## 关联查询 <Badge type="tip" text="v1.5.5" />
 
-`Model` 提供了 `joins` 与 `@Relation` 两种方式实现多表关联查询，例如：用户与角色的关系：
+`Model` 提供了三种方式实现多表关联查询，例如：用户与角色的关系：
 
-- 通过 [joins](./relations-query.md#方案-3-join-query) 联表方式查询数据：
+- （默认）通过 [Joins Query](./relations-query.md#方案-3-join-query) 联表方式查询数据：
 
 ```java
 User.create()
     .select(USER.ALL_COLUMNS,ROLE.ALL_COLUMNS)
     .leftJoin(USER_ROLE).as("ur").on(USER_ROLE.USER_ID.eq(USER.USER_ID))
     .leftJoin(ROLE).as("r").on(USER_ROLE.ROLE_ID.eq(ROLE.ROLE_ID))
-    .where(USER.USER_ID.eq(2))
+    .where(USER.USER_ID.eq(1))
     .one();
 ```
-> 更多关于 `left join` 等 join 查询，请请点击 [这里](./relations-query.md#方案-3-join-query);
 
+> 获取更多关于 `Joins Query` 的信息，请点击 [这里](./relations-query.md#方案-3-join-query)
 
-
-- 通过 [@Relation](./relations-query.md#方案-1relations-注解) 相关注解查询数据：
+- 通过 [Relations Query](./relations-query.md#方案-1relations-注解) 的方式查询数据：
 
 ```java
 User.create()
-    .where(USER.USER_ID.eq(2))
-    .oneWithRelations();
+    .where(USER.USER_ID.eq(1))
+    .withRelations() // 使用 Relations Query 的方式进行关联查询。
+    .maxDepth(3) // 设置父子关系查询中，默认的递归查询深度。
+    .ignoreRelations("orderList") // 忽略查询部分 Relations 注解标记的属性。
+    .extraConditionParam("id", 100) // 添加额外的 Relations 查询条件。
+    .one();
 ```
 
-> 以上是用于查询 `一对多`、`多对多` 等场景，更多信息请点击 [这里](./relations-query.md#方案-1-relations-注解);
+> 获取更多关于 `Relations Query` 的信息，请点击 [这里](./relations-query.md#方案-1relations-注解)
+
+- 通过 [Fields Query](./relations-query.md#方案-1relations-注解) 的方式查询数据：
+
+```java
+User.create()
+    .where(USER.USER_ID.eq(1))
+    .withFields() // 使用 Fields Query 的方式进行关联查询。
+    .fieldMapping(User::getRoleList, user -> // 设置属性对应的 QueryWrapper 查询。
+        QueryWrapper.create()
+            .select()
+            .from(ROLE)
+            .where(ROLE.ROLE_ID.in(
+                QueryWrapper.create()
+                .select(USER_ROLE.ROLE_ID)
+                .from(USER_ROLE)
+                .where(USER_ROLE.USER_ID.eq(user.getUserId()))
+        )))
+    .one();
+```
+
+> 获取更多关于 `Fields Query` 的信息，请点击 [这里](./relations-query.md#方案-2field-query)

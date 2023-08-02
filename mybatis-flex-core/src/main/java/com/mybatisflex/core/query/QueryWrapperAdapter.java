@@ -84,6 +84,12 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     }
 
     @Override
+    public R select(QueryColumn[] queryColumns, QueryColumn... queryColumns2) {
+        super.select(queryColumns,queryColumns2);
+        return (R) this;
+    }
+
+    @Override
     public R from(TableDef... tableDefs) {
         super.from(tableDefs);
         return (R) this;
@@ -577,19 +583,19 @@ public class QueryWrapperAdapter<R extends QueryWrapperAdapter<R>> extends Query
     }
 
     @Override
-    public R limit(Integer rows) {
+    public R limit(Number rows) {
         super.limit(rows);
         return (R) this;
     }
 
     @Override
-    public R offset(Integer offset) {
+    public R offset(Number offset) {
         super.offset(offset);
         return (R) this;
     }
 
     @Override
-    public R limit(Integer offset, Integer rows) {
+    public R limit(Number offset, Number rows) {
         super.limit(offset, rows);
         return (R) this;
     }

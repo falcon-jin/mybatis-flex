@@ -91,12 +91,12 @@ WHERE account_id IN (1, 2, 3, 4, 5)
 
 **注意事项 1：**
 
-在以上的 `@RelationOneToOne` 注解配置中，若 `IDCard.java`  是一个没有 `@Table` 注解修饰的实体类，
+在以上的 `@RelationOneToOne` 注解中，若 `IDCard.java` 是 VO、DTO 等，而不是一个带有 `@Table` 注解的 Entity 类，
 则需要在 `@RelationOneToOne` 配置上 `targetTable` 用于指定查询的表名。
 
 
-假设 `IDCard.java` 没有 `@Table` 注解修饰（比如 vo 或 dto 等），配置如下：
-```java 9
+例如：
+```java 10
 public class Account implements Serializable {
 
     @Id(keyType = KeyType.Auto)
@@ -104,6 +104,7 @@ public class Account implements Serializable {
 
     private String userName;
 
+    // 假设 IDCard 类是 vo 或者 dto，需要配置 targetTable
     @RelationOneToOne(selfField = "id", targetField = "accountId"
         , targetTable = "tb_idcard")
     private IDCard idCard;
@@ -115,7 +116,7 @@ public class Account implements Serializable {
 **注意事项 2：**
 
 在 `Account.java` 和 `IDCard.java` 示例中，若他们的关联关系是通过 **中间表** 的方式进行关联，则需要添加
-`joinTable` `joinSelfColumn` `joinTargetColumn` 配置，如下所示：
+`joinTable`、 `joinSelfColumn`、 `joinTargetColumn` 配置，如下所示：
 
 ```java 9,10,11
 public class Account implements Serializable {
@@ -203,7 +204,7 @@ WHERE account_id IN (1, 2, 3, 4, 5)
 
 **Map 映射**
 
-若 `Account.books` 是一个 `Map`，而非 `List`，那么，我们需要通过配置 `mapKeyField` 来指定使用用个列来充当 `Map` 的 `Key`，
+若 `Account.books` 是一个 `Map`，而非 `List`，那么，我们需要通过配置 `mapKeyField` 来指定使用 `Book` 的那个列来充当 `Map` 的 `Key`，
 如下代码所示：
 
 ```java 9
@@ -217,6 +218,11 @@ public class Account implements Serializable {
     @RelationOneToMany(selfField = "id", targetField = "accountId"
         , mapKeyField = "id") //使用 Book 的 id 来填充这个 map 的 key
     private Map<Long, Book> books;
+
+
+    //注意 map 的 key 的类型，可以和 Book 的 id 类型不一致也是支持的
+    //比如：
+    //private Map<String, Book> books;
 
     //getter setter
 }
